@@ -8,6 +8,7 @@ import com.danilocicvaric.canteen_system.mappers.ReservationMapper;
 import com.danilocicvaric.canteen_system.models.*;
 import com.danilocicvaric.canteen_system.repositories.CanteenRepository;
 import com.danilocicvaric.canteen_system.repositories.ReservationRepository;
+import com.danilocicvaric.canteen_system.repositories.RestrictionRepository;
 import com.danilocicvaric.canteen_system.repositories.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +27,7 @@ public class ReservationService implements IReservationService {
     private final ReservationRepository reservationRepository;
     private final StudentRepository studentRepository;
     private final CanteenRepository canteenRepository;
+    private final RestrictionRepository restrictionRepository;
     private final ReservationMapper mapper;
 
     @Transactional
@@ -85,9 +88,10 @@ public class ReservationService implements IReservationService {
         validateNotInPast(date, time);
         validateDuration(duration);
         validateTimeOnHourOrHalfHour(time);
-        validateWithinWorkingHours(canteen, time, duration);
+        validateWithinWorkingHours(canteen, date, time, duration);
         validateCapacity(canteen, date, time, duration);
         validateNoStudentOverlap(student, date, time, duration);
+        validateMealTypeLimit(student, canteen, date, time);
     }
 
     private void validateNotInPast(LocalDate date, LocalTime time) {
@@ -111,9 +115,21 @@ public class ReservationService implements IReservationService {
             throw new IllegalArgumentException(ErrorCode.RESERVATION_INVALID_TIME.getMessageKey());
     }
 
-    private void validateWithinWorkingHours(Canteen canteen, LocalTime time, int duration) {
+    private void validateWithinWorkingHours(Canteen canteen, LocalDate date, LocalTime time, int duration) {
         // Must fit within at least one working hour interval
-        boolean fitsInWorkingHours = canteen.getWorkingHours().stream()
+        Optional<Restriction> activeRestriction = restrictionRepository
+                .findActiveRestriction(canteen.getId(), date);
+
+        List<CanteenWorkingHour> effectiveHours;
+
+        if (activeRestriction.isPresent()) {
+            // If restriction exists, prioritize it over regular working hours
+            effectiveHours = activeRestriction.get().getWorkingHours();
+        } else {
+            effectiveHours = canteen.getWorkingHours();
+        }
+
+        boolean fitsInWorkingHours = effectiveHours.stream()
                 .anyMatch(wh -> !time.isBefore(wh.getFromTime())
                         && !time.plusMinutes(duration).isAfter(wh.getToTime()));
 
@@ -143,6 +159,20 @@ public class ReservationService implements IReservationService {
             boolean overlaps = time.isBefore(existingEnd) && existingStart.isBefore(newEnd);
             if (overlaps)
                 throw new IllegalArgumentException(ErrorCode.RESERVATION_STUDENT_OVERLAP.getMessageKey());
+        }
+    }
+
+    private void validateMealTypeLimit(Student student, Canteen canteen, LocalDate date, LocalTime time) {
+        MealType currentMealType = canteen.getWorkingHours().stream()
+                .filter(wh -> !time.isBefore(wh.getFromTime()) && !time.isAfter(wh.getToTime()))
+                .findFirst()
+                .map(CanteenWorkingHour::getMeal)
+                .orElseThrow(() -> new IllegalArgumentException(ErrorCode.RESERVATION_NOT_IN_WORKING_HOURS.getMessageKey()));
+
+        long existingCount = reservationRepository.countByStudentDateAndMealType(student, date, currentMealType);
+
+        if (existingCount >= 2) {
+            throw new IllegalArgumentException(ErrorCode.RESERVATION_MEAL_LIMIT_EXCEEDED.getMessageKey());
         }
     }
 
