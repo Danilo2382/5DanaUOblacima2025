@@ -21,9 +21,8 @@ public class UtilService implements IUtilService {
 
     @Override
     public void clearAllData() {
+        reservationRepository.deleteAll();
         canteenRepository.deleteAll();
         studentRepository.deleteAll();
-        reservationRepository.deleteAll();
     }
-
 }
