@@ -31,7 +31,7 @@ public class StudentService implements IStudentService {
         if (studentRepository.existsByEmailIgnoreCase(req.email()))
             throw new IllegalArgumentException(ErrorCode.EMAIL_ALREADY_EXISTS.getMessageKey());
 
-        if (studentRepository.existsByIndexNumber(req.indexNumber()))
+        if (req.indexNumber() != null && studentRepository.existsByIndexNumber(req.indexNumber()))
             throw new IllegalArgumentException(ErrorCode.INDEX_NUMBER_EXISTS.getMessageKey());
 
         // Map DTO to entity and save

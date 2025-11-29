@@ -8,8 +8,8 @@ public class StudentDtos {
     public record CreateStudentRequest(
             @NotBlank String name,
             @NotBlank @Email String email,
-            @NotBlank String indexNumber,
-            boolean isAdmin
+                    String indexNumber,
+                    boolean isAdmin
     ) {}
 
     public record StudentResponse(

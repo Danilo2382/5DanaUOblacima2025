@@ -27,7 +27,6 @@ public class Student {
     @Email
     private String email;
 
-    @Column(unique = true, name = "index_number")
     private String indexNumber;
 
     private boolean isAdmin;
