@@ -1,7 +1,9 @@
 package com.danilocicvaric.canteen_system.controllers;
 
 import com.danilocicvaric.canteen_system.dtos.CanteenDtos.*;
+import com.danilocicvaric.canteen_system.dtos.RestrictionDtos;
 import com.danilocicvaric.canteen_system.services.ICanteenService;
+import com.danilocicvaric.canteen_system.services.IRestrictionService;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import java.util.List;
 public class CanteenController {
 
     private final ICanteenService canteenService;
+    private final IRestrictionService restrictionService;
 
     @PostMapping
     public ResponseEntity<@NonNull CanteenResponse> create(@RequestHeader("studentId") Long studentId,
@@ -67,5 +70,12 @@ public class CanteenController {
                                                        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime endTime,
                                                        @RequestParam int duration) {
         return canteenService.statusOne(id, startDate, endDate, startTime, endTime, duration);
+    }
+
+    @PostMapping("/{id}/restrictions")
+    public ResponseEntity<RestrictionDtos.@NonNull RestrictionResponse> createRestriction(@RequestHeader("studentId") Long studentId,
+                                                                                          @PathVariable Long id,
+                                                                                          @Valid @RequestBody RestrictionDtos.CreateRestrictionRequest req) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(restrictionService.create(studentId, id, req));
     }
 }

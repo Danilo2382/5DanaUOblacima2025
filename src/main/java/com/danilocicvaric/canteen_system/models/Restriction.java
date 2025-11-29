@@ -25,10 +25,10 @@ public class Restriction {
     @JoinColumn(name = "canteen_id", nullable = false)
     private Canteen canteen;
 
-    @NotNull(message = "Start date is required")
+    @NotNull
     private LocalDate startDate;
 
-    @NotNull(message = "End date is required")
+    @NotNull
     private LocalDate endDate;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -36,5 +36,5 @@ public class Restriction {
             name = "restriction_working_hours",
             joinColumns = @JoinColumn(name = "restriction_id")
     )
-    private List<@Valid CanteenWorkingHour> temporaryWorkingHours = new ArrayList<>();
+    private List<@Valid CanteenWorkingHour> workingHours = new ArrayList<>();
 }

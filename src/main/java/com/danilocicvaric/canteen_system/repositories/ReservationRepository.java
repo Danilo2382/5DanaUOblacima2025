@@ -25,4 +25,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                      @Param("duration") int duration);
 
     List<Reservation> findByCanteenAndStatus(Canteen canteen, ReservationStatus status);
+    List<Reservation> findByCanteenIdAndDateBetween(Long canteenId, LocalDate startDate, LocalDate endDate);
 }
