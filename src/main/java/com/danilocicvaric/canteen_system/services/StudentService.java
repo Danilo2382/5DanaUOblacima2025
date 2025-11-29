@@ -49,7 +49,8 @@ public class StudentService implements IStudentService {
             create(req);
         }
         // Map DTO to entity and save
-        student = studentMapper.toEntity(req);
+        // student = studentMapper.toEntity(req);
+        student.setIndexNumber(req.indexNumber());
         Student savedStudent = studentRepository.save(student);
 
         subscribeToNotifications(savedStudent.getEmail());
