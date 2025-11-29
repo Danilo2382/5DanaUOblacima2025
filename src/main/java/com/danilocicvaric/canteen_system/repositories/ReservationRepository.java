@@ -23,6 +23,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByCanteenAndStatus(Canteen canteen, ReservationStatus status);
 
+    List<Reservation> findByCanteenIdAndDateBetween(Long canteenId, LocalDate startDate, LocalDate endDate);
+
     @Query("""
         SELECT COUNT(r) FROM Reservation r
         JOIN r.canteen c
