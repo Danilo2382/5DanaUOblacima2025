@@ -2,10 +2,10 @@ spring:
   application:
     name: canteen-system
   datasource:
-    url: jdbc:h2:mem:canteen_db;DB_CLOSE_DELAY=-1;MODE=LEGACY
-    driverClassName: org.h2.Driver
-    username: sa
-    password: ""
+    url: jdbc:postgresql://postgres.cpsuquyaup3o.eu-west-2.rds.amazonaws.com:5432/postgres
+    driverClassName: org.postgresql.Driver
+    username: postgres
+    password: postgres
   h2:
     console:
       enabled: true
@@ -16,6 +16,8 @@ spring:
       hibernate:
         jdbc:
           time_zone: UTC
+        dialect: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
 server:
+  address: 0.0.0.0
   port: 8080
