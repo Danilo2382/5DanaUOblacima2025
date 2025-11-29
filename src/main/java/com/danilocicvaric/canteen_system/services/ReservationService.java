@@ -91,6 +91,7 @@ public class ReservationService implements IReservationService {
         validateWithinWorkingHours(canteen, date, time, duration);
         validateCapacity(canteen, date, time, duration);
         validateNoStudentOverlap(student, date, time, duration);
+        validateMealTypeLimit(student, canteen, date, time);
     }
 
     private void validateNotInPast(LocalDate date, LocalTime time) {
@@ -158,6 +159,20 @@ public class ReservationService implements IReservationService {
             boolean overlaps = time.isBefore(existingEnd) && existingStart.isBefore(newEnd);
             if (overlaps)
                 throw new IllegalArgumentException(ErrorCode.RESERVATION_STUDENT_OVERLAP.getMessageKey());
+        }
+    }
+
+    private void validateMealTypeLimit(Student student, Canteen canteen, LocalDate date, LocalTime time) {
+        MealType currentMealType = canteen.getWorkingHours().stream()
+                .filter(wh -> !time.isBefore(wh.getFromTime()) && !time.isAfter(wh.getToTime()))
+                .findFirst()
+                .map(CanteenWorkingHour::getMeal)
+                .orElseThrow(() -> new IllegalArgumentException(ErrorCode.RESERVATION_NOT_IN_WORKING_HOURS.getMessageKey()));
+
+        long existingCount = reservationRepository.countByStudentDateAndMealType(student, date, currentMealType);
+
+        if (existingCount >= 2) {
+            throw new IllegalArgumentException(ErrorCode.RESERVATION_MEAL_LIMIT_EXCEEDED.getMessageKey());
         }
     }
 
