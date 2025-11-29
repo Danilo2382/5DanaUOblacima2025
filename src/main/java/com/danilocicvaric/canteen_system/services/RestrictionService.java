@@ -11,8 +11,13 @@ import com.danilocicvaric.canteen_system.repositories.CanteenRepository;
 import com.danilocicvaric.canteen_system.repositories.ReservationRepository;
 import com.danilocicvaric.canteen_system.repositories.RestrictionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.model.PublishRequest;
+import software.amazon.awssdk.services.sns.model.SubscribeRequest;
+import software.amazon.awssdk.services.sns.model.SubscribeResponse;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -23,6 +28,11 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class RestrictionService implements IRestrictionService {
+
+    private final SnsClient snsClient;
+
+    @Value("${aws.sns.topic-arn}")
+    private String snsTopicArn;
 
     private final RestrictionRepository restrictionRepository;
     private final CanteenRepository canteenRepository;
@@ -36,6 +46,10 @@ public class RestrictionService implements IRestrictionService {
         Canteen canteen = findCanteenByIdOrThrow(canteenId);
         LocalDate start = LocalDate.parse(req.startDate());
         LocalDate end = LocalDate.parse(req.endDate());
+
+        if (start.isAfter(end)) {
+            throw new IllegalArgumentException("Start date should be after end date");
+        }
 
         boolean overlapExists = restrictionRepository
                 .existsByCanteenIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
@@ -53,7 +67,7 @@ public class RestrictionService implements IRestrictionService {
 
         List<CanteenWorkingHour> tempHours = req.workingHours().stream()
                 .map(wh -> new CanteenWorkingHour(
-                        MealType.valueOf(wh.meal().toUpperCase()), // Ensure Enum match
+                        MealType.valueOf(wh.meal().toUpperCase()),
                         LocalTime.parse(wh.from()),
                         LocalTime.parse(wh.to())
                 ))
@@ -104,12 +118,20 @@ public class RestrictionService implements IRestrictionService {
                 res.getCanteen().getName(),
                 res.getDate()
         );
+        String subject = "Reservation Cancellation - Canteen System";
 
         try {
-            // email needs to be sent
-            // emailService.sendSimpleEmail(res.getStudent().getEmail(), "Reservation Cancellation", emailBody);
+            PublishRequest request = PublishRequest.builder()
+                    .topicArn(snsTopicArn)
+                    .message(emailBody)
+                    .subject(subject)
+                    .build();
+
+            snsClient.publish(request);
+            System.out.println("SNS Notification sent to topic for student: " + res.getStudent().getEmail());
+
         } catch (Exception e) {
-            System.err.println("Failed to send cancellation email to " + res.getStudent().getEmail());
+            System.err.println("Failed to send cancellation email via SNS: " + e.getMessage());
         }
 
         res.setStatus(ReservationStatus.CANCELLED);
