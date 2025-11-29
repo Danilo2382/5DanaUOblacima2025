@@ -9,6 +9,7 @@ import com.danilocicvaric.canteen_system.mappers.ReservationMapper;
 import com.danilocicvaric.canteen_system.models.*;
 import com.danilocicvaric.canteen_system.repositories.CanteenRepository;
 import com.danilocicvaric.canteen_system.repositories.ReservationRepository;
+import com.danilocicvaric.canteen_system.repositories.RestrictionRepository;
 import com.danilocicvaric.canteen_system.repositories.StudentRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +36,8 @@ class ReservationServiceTest {
     private StudentRepository studentRepository;
     @Mock
     private CanteenRepository canteenRepository;
+    @Mock
+    private RestrictionRepository restrictionRepository;
     @Mock
     private ReservationMapper mapper;
 
