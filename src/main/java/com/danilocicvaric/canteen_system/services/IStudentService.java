@@ -7,4 +7,6 @@ public interface IStudentService {
     StudentResponse create(CreateStudentRequest req);
 
     StudentResponse getByIdOrThrow(Long id);
+
+    StudentResponse update(CreateStudentRequest req);
 }

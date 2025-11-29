@@ -10,6 +10,7 @@ public enum ErrorCode {
     // Student errors
     STUDENT_NOT_FOUND("Student not found"),
     EMAIL_ALREADY_EXISTS("Email already exists"),
+    INDEX_NUMBER_EXISTS("Index number already exists"),
     ONLY_ADMIN_CAN_PERFORM("Only admin student can perform this action"),
 
     // Canteen errors

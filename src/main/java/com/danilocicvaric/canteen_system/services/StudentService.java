@@ -31,8 +31,25 @@ public class StudentService implements IStudentService {
         if (studentRepository.existsByEmailIgnoreCase(req.email()))
             throw new IllegalArgumentException(ErrorCode.EMAIL_ALREADY_EXISTS.getMessageKey());
 
+        if (req.indexNumber() != null && studentRepository.existsByIndexNumber(req.indexNumber()))
+            throw new IllegalArgumentException(ErrorCode.INDEX_NUMBER_EXISTS.getMessageKey());
+
         // Map DTO to entity and save
         Student student = studentMapper.toEntity(req);
+        Student savedStudent = studentRepository.save(student);
+
+        subscribeToNotifications(savedStudent.getEmail());
+        return studentMapper.toResponse(savedStudent);
+    }
+
+    @Transactional
+    public StudentResponse update(CreateStudentRequest req) {
+        Student student = studentRepository.findByEmail(req.email());
+        if (student == null) {
+            create(req);
+        }
+        // Map DTO to entity and save
+        student = studentMapper.toEntity(req);
         Student savedStudent = studentRepository.save(student);
 
         subscribeToNotifications(savedStudent.getEmail());

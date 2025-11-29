@@ -27,5 +27,7 @@ public class Student {
     @Email
     private String email;
 
+    private String indexNumber;
+
     private boolean isAdmin;
 }
