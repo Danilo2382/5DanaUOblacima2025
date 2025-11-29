@@ -10,6 +10,7 @@ public enum ErrorCode {
     // Student errors
     STUDENT_NOT_FOUND("Student not found"),
     EMAIL_ALREADY_EXISTS("Email already exists"),
+    INDEX_NUMBER_EXISTS("Index number already exists"),
     ONLY_ADMIN_CAN_PERFORM("Only admin student can perform this action"),
 
     // Canteen errors
@@ -34,7 +35,8 @@ public enum ErrorCode {
     RESERVATION_NOT_IN_WORKING_HOURS("Time not within canteen working hours"),
     RESERVATION_NO_CAPACITY("No remaining capacity for selected slot"),
     RESERVATION_STUDENT_OVERLAP("Student already has a reservation in the selected interval"),
-    RESERVATION_ONLY_OWNER_CAN_CANCEL("Only reservation owner can cancel it");
+    RESERVATION_ONLY_OWNER_CAN_CANCEL("Only reservation owner can cancel it"),
+    RESERVATION_MEAL_LIMIT_EXCEEDED("Limit of 2 reservations per meal type reached");
 
     private final String messageKey;
 }

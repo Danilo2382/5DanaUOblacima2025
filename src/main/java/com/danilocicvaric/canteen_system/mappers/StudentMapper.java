@@ -11,9 +11,11 @@ public interface StudentMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(source = "isAdmin", target = "admin")
+    @Mapping(source = "indexNumber", target = "indexNumber")
     Student toEntity(CreateStudentRequest request);
 
     @Mapping(target = "id", expression = "java(String.valueOf(student.getId()))")
     @Mapping(source = "admin", target = "isAdmin")
+    @Mapping(source = "indexNumber", target = "indexNumber")
     StudentResponse toResponse(Student student);
 }
