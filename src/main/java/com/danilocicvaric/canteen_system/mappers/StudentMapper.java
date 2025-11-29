@@ -4,6 +4,7 @@ import com.danilocicvaric.canteen_system.dtos.StudentDtos.*;
 import com.danilocicvaric.canteen_system.models.Student;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.context.annotation.Bean;
 
 @Mapper(componentModel = "spring")
 public interface StudentMapper {

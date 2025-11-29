@@ -1,9 +1,6 @@
 package com.danilocicvaric.canteen_system.repositories;
 
-import com.danilocicvaric.canteen_system.models.Canteen;
-import com.danilocicvaric.canteen_system.models.Reservation;
-import com.danilocicvaric.canteen_system.models.ReservationStatus;
-import com.danilocicvaric.canteen_system.models.Student;
+import com.danilocicvaric.canteen_system.models.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,4 +22,19 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                      @Param("duration") int duration);
 
     List<Reservation> findByCanteenAndStatus(Canteen canteen, ReservationStatus status);
+
+    @Query("""
+        SELECT COUNT(r) FROM Reservation r
+        JOIN r.canteen c
+        JOIN c.workingHours wh
+        WHERE r.student = :student
+          AND r.date = :date
+          AND r.status = 'ACTIVE'
+          AND wh.meal = :mealType
+          AND r.time >= wh.fromTime
+          AND r.time < wh.toTime
+    """)
+    long countByStudentDateAndMealType(@Param("student") Student student,
+                                       @Param("date") LocalDate date,
+                                       @Param("mealType") MealType mealType);
 }
