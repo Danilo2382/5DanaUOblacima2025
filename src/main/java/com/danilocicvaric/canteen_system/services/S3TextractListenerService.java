@@ -88,7 +88,7 @@ public class S3TextractListenerService {
 
         CreateStudentRequest studentRequest = textractService.processDocument(bucketName, decodedObjectKey);
 
-        studentService.create(studentRequest);
+        studentService.update(studentRequest);
 
         textractService.processDocument(bucketName, decodedObjectKey);
     }

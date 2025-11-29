@@ -42,6 +42,20 @@ public class StudentService implements IStudentService {
         return studentMapper.toResponse(savedStudent);
     }
 
+    @Transactional
+    public StudentResponse update(CreateStudentRequest req) {
+        Student student = studentRepository.findByEmail(req.email());
+        if (student == null) {
+            create(req);
+        }
+        // Map DTO to entity and save
+        student = studentMapper.toEntity(req);
+        Student savedStudent = studentRepository.save(student);
+
+        subscribeToNotifications(savedStudent.getEmail());
+        return studentMapper.toResponse(savedStudent);
+    }
+
     @Transactional(readOnly = true)
     public StudentResponse getByIdOrThrow(Long id) {
         // Retrieve student by ID or throw NotFoundException

@@ -10,4 +10,6 @@ public interface StudentRepository extends JpaRepository<@NonNull Student, @NonN
     boolean existsByEmailIgnoreCase(String email);
 
     boolean existsByIndexNumber(String indexNumber);
+
+    Student findByEmail(String email);
 }
